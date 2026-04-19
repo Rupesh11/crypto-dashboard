@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="coin-table.css" />
     <title>coingecko demo</title>
   </head>
   <body>
@@ -18,7 +19,23 @@
       <div class="heading">
         <h1>Top 10 Live Crypto Market</h1>
       </div>
-      <div id="coin-lists"></div>
+      <div id="filter-coins">
+        <div class="arrow">
+          <img class="arrow-up" src="Images/arrowUP.png" />
+          <img class="arrow-down" src="Images/arrowDOWN.png" />
+        </div>
+        <div class="coin-names">
+          <span>#Coin </span>
+        </div>
+        <span> Price </span>
+        <span> 1h </span>
+        <span> 24h </span>
+        <span> 7d </span>
+        <span> 24h Volume </span>
+        <span> Market Cap </span>
+        <span> Last 7 Days </span>
+      </div>
+      <table id="coin-lists"></table>
     </div>
     <script src="script.js"></script>
   </body>

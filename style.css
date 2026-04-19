@@ -1,5 +1,15 @@
 body {
   margin: 0;
+  background-color: #ffffff;
+}
+
+span {
+  color: #000000;
+}
+
+p,
+h4 {
+  color: #000000;
 }
 
 .main-container {
@@ -7,7 +17,7 @@ body {
   margin: auto;
   display: flex;
   flex-direction: column;
-  gap: 5em;
+  background-color: #ffffff;
 }
 
 #logo {
@@ -29,6 +39,7 @@ body {
 .nav-bar h1 {
   margin: auto;
   font-size: 20px;
+  color: rgb(238, 118, 7);
 }
 #search-coin {
   float: right;
@@ -39,50 +50,7 @@ body {
 }
 
 .heading {
-  text-align: center;
+  text-align: left;
+  color: rgb(238, 118, 7);
 }
 
-.icon-picture {
-  max-width: 50px;
-  max-height: 50px;
-  border-radius: 50%;
-}
-
-#coin-lists {
-  display: flex;
-  width: 80%;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  overflow: none;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.coin-box {
-  flex: 1 1 10rem;
-  background-color: rgb(246, 247, 185);
-  border-radius: 15px;
-  text-align: center;
-  padding: 0.5rem;
-}
-
-.coin-details p {
-  margin: 0;
-  text-transform: uppercase;
-}
-
-.coin-details h4 {
-  margin: 0;
-}
-
-.green {
-  color: green;
-}
-
-.red {
-  color: red;
-}
-
-black {
-  color: black;
-}
