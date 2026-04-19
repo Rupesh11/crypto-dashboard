@@ -25,7 +25,7 @@ async function renderCoins() {
       if (value > 0) {
         colorSwitch = "green";
         plusMinus = "+";
-      } 
+      }
       coinOutput += `
       <div class = "coin-box">
       <img class="icon-picture" src = "${coin.image}" alt="Coin Icon">
