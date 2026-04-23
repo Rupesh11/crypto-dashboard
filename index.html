@@ -14,28 +14,32 @@
           <img id="logo" src="Images/logo.png" />
           <h1>coingecko</h1>
         </div>
+        <div id="counter"></div>
         <input id="search-coin" type="text" placeholder="Search..." />
       </div>
       <div class="heading">
         <h1>Top 10 Live Crypto Market</h1>
       </div>
-      <div id="filter-coins">
-        <div class="arrow">
-          <img class="arrow-up" src="Images/arrowUP.png" />
-          <img class="arrow-down" src="Images/arrowDOWN.png" />
-        </div>
-        <div class="coin-names">
-          <span>#Coin </span>
-        </div>
-        <span> Price </span>
-        <span> 1h </span>
-        <span> 24h </span>
-        <span> 7d </span>
-        <span> 24h Volume </span>
-        <span> Market Cap </span>
-        <span> Last 7 Days </span>
+      <div class="toggle">
+        <h4>Click the button for EUR pricing</h4>
+        <button class="currency-button">USD</button>
       </div>
-      <table id="coin-lists"></table>
+
+      <div id="filter-coins">
+        <div class="col rank">
+          <span class="arrow-up">▴</span>
+          <span># </span>
+        </div>
+        <div class="col"><span class="arrow-down">▾</span>Coin</div>
+        <div class="col"><span class="arrow-down">▾</span>Price</div>
+        <div class="col"><span class="arrow-down">▾</span>1h</div>
+        <div class="col"><span class="arrow-down">▾</span>24h</div>
+        <div class="col"><span class="arrow-down">▾</span>7d</div>
+        <div class="col"><span class="arrow-down">▾</span>24h Volume</div>
+        <div class="col"><span class="arrow-down">▾</span>Market Cap</div>
+        <div class="col">Last 7 Days</div>
+      </div>
+      <div id="coin-lists"></div>
     </div>
     <script src="script.js"></script>
   </body>

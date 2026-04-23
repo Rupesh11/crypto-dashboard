@@ -13,8 +13,8 @@ h4 {
 }
 
 .main-container {
-  max-width: 80%;
-  margin: auto;
+  width: min(95%, 1400px);
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   background-color: #ffffff;
@@ -51,6 +51,21 @@ h4 {
 
 .heading {
   text-align: left;
-  color: rgb(238, 118, 7);
+  color: #ee7607;
 }
 
+#counter {
+  padding-top: 1rem;
+  text-decoration: underline;
+}
+
+.currency-button {
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  border: none;
+}
+
+.currency-button:hover {
+  background-color: #1ada09;
+}

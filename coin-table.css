@@ -4,16 +4,23 @@
   border-radius: 50%;
 }
 
-#filter-coins {
-  display: flex;
-  border-top: 1px solid gray;
-  border-bottom: 1px solid gray;
-  padding: 10px;
+#filter-coins,
+.coin-table {
+  display: grid;
+  grid-template-columns:
+    40px /* rank */
+    260px /* coin */
+    120px /* price */
+    80px /* 1h */
+    80px /* 24h */
+    80px /* 7d */
+    160px /* volume */
+    180px /* market cap */
+    140px; /* chart */
+  align-items: center;
+  width: 100%;
+  column-gap: 16px;
 }
-
-.coin-names {
-}
-
 .green {
   color: green;
 }
@@ -22,36 +29,22 @@
   color: red;
 }
 
+.coin-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.coin-info p {
+  text-transform: uppercase;
+}
+
 .coin-name {
   display: flex;
   align-items: center;
-  gap: 0.2rem;
-}
-
-.coin-name p {
-  text-transform: uppercase;
-  font-size: 12px;
-  color: #808080;
-}
-
-.coin-stats {
-  display: flex;
-}
-
-.arrow {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-items: start;
-}
-
-.arrow-up {
-  width: 10px;
-  height: 10px;
+  gap: 5px;
 }
 
 .arrow-down {
-  width: 14px;
-  height: 14px;
-  visibility: hidden;
+  display: none;
 }
