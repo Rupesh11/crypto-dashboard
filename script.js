@@ -3,17 +3,39 @@ const API_KEY = "CG-EXAgPfFigPe2qiSZuytxLjuc";
 const coinList = document.getElementById("coin-lists");
 const currencyButton = document.querySelector(".currency-button");
 let currency = localStorage.getItem("currency") ?? "usd";
-
+const input = document.getElementById("search-coin");
+let allCoins = [];
 currencyButton.addEventListener("click", () => {
   if (currency === "eur") {
     currency = "usd";
-    renderCoins();
+    buttonText();
+    loadData();
   } else if (currency === "usd") {
     currency = "eur";
-    renderCoins();
+    buttonText();
+    loadData();
   }
   localStorage.setItem("currency", currency);
 });
+
+function buttonText() {
+  if (currency === "eur") {
+    currencyButton.textContent = "USD";
+  } else {
+    currencyButton.textContent = "EUR";
+  }
+}
+
+function filterCoinNames() {
+  const filtered = allCoins.filter((coin) => {
+    return (
+      coin.name.toUpperCase().includes(input.value.toUpperCase()) ||
+      coin.symbol.toUpperCase().includes(input.value.toUpperCase())
+    );
+  });
+  renderCoins(filtered);
+}
+
 async function getCoinsData() {
   const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=10&page=1&price_change_percentage=1h,24h,7d&sparkline=true&x_cg_demo_api_key=${API_KEY}`;
 
@@ -26,30 +48,28 @@ async function getCoinsData() {
   }
 }
 
-async function renderCoins() {
-  try {
-    if (coinList.children.length === 0) {
-      loadingState();
-    }
-    const coinData = await getCoinsData();
-    let symbol = "$";
-    let coinOutput = "";
-    if (currency === "usd") {
-      symbol = "$";
-    } else if (currency === "eur") {
-      symbol = "€";
-    }
+function renderCoins(coinsToRender) {
+  if (coinList.children.length === 0) {
+    loadingState();
+  }
+  let symbol = "$";
+  let coinOutput = "";
+  if (currency === "usd") {
+    symbol = "$";
+  } else if (currency === "eur") {
+    symbol = "€";
+  }
 
-    coinData.forEach((coin, index) => {
-      const valueTwentyFourHr = coin.price_change_percentage_24h ?? 0;
-      const valueOneHr = coin.price_change_percentage_1h_in_currency ?? 0;
-      const valueSevenDays = coin.price_change_percentage_7d_in_currency ?? 0;
+  coinsToRender.forEach((coin, index) => {
+    const valueTwentyFourHr = coin.price_change_percentage_24h ?? 0;
+    const valueOneHr = coin.price_change_percentage_1h_in_currency ?? 0;
+    const valueSevenDays = coin.price_change_percentage_7d_in_currency ?? 0;
 
-      const twentyFourHr = getChangeStyle(valueTwentyFourHr);
-      const oneHr = getChangeStyle(valueOneHr);
-      const sevenDays = getChangeStyle(valueSevenDays);
+    const twentyFourHr = getChangeStyle(valueTwentyFourHr);
+    const oneHr = getChangeStyle(valueOneHr);
+    const sevenDays = getChangeStyle(valueSevenDays);
 
-      coinOutput += `
+    coinOutput += `
       <div class="coin-table">
       <div> ${index + 1} </div>
 
@@ -70,8 +90,15 @@ async function renderCoins() {
         </div>
 
       `;
-    });
-    coinList.innerHTML = coinOutput;
+  });
+  coinList.innerHTML = coinOutput;
+}
+
+async function loadData() {
+  try {
+    const coinData = await getCoinsData();
+    allCoins = coinData;
+    renderCoins(allCoins);
   } catch (error) {
     console.log(error);
     errorState();
@@ -86,7 +113,7 @@ function autoRefresh() {
     timeLeft--;
     if (timeLeft <= 0) {
       timeLeft = 60;
-      renderCoins();
+      loadData();
     }
   }, 1000);
 }
@@ -106,6 +133,7 @@ function getChangeStyle(value) {
     return { className: "red", sign: "" };
   }
 }
-
-renderCoins();
+buttonText();
+loadData();
+input.addEventListener("input", filterCoinNames);
 autoRefresh();
