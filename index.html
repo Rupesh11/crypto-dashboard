@@ -24,23 +24,31 @@
         <h4>Please click the button to change the currency</h4>
         <button class="currency-button">EUR</button>
       </div>
-
+      <div class="coin-modal" id="coin-modal">
+        <button class="coin-modal-close-btn" id="coin-modal-close-btn">
+          X
+        </button>
+        <div id="coin-modal-inner"></div>
+      </div>
       <div id="filter-coins">
         <div class="col rank">
           <span class="arrow-up">▴</span>
           <span># </span>
         </div>
-        <div class="col"><span class="arrow-down">▾</span>Coin</div>
-        <div class="col"><span class="arrow-down">▾</span>Price</div>
+        <div class="col">
+          <button class="arrow-down">Coin</button>
+        </div>
+        <!-- <div class="col"><span class="arrow-down">▾</span>Price</div>
         <div class="col"><span class="arrow-down">▾</span>1h</div>
         <div class="col"><span class="arrow-down">▾</span>24h</div>
         <div class="col"><span class="arrow-down">▾</span>7d</div>
         <div class="col"><span class="arrow-down">▾</span>24h Volume</div>
         <div class="col"><span class="arrow-down">▾</span>Market Cap</div>
-        <div class="col">Last 7 Days</div>
+        <div class="col">Last 7 Days</div> -->
       </div>
       <div id="coin-lists"></div>
     </div>
     <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </body>
 </html>
