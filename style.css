@@ -15,9 +15,6 @@ h4 {
 .main-container {
   width: min(95%, 1400px);
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  background-color: #ffffff;
 }
 
 #logo {
@@ -71,9 +68,22 @@ h4 {
   cursor: pointer;
 }
 
-.col :hover {
+.col {
   cursor: pointer;
-  border: none;
+  white-space: nowrap;
+}
+
+.sort-arrow {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.colhover .sort-arrow {
+  opacity: 1;
+}
+
+.col.active .sort-arrow {
+  opacity: 1;
 }
 
 .coin-modal {
@@ -120,4 +130,58 @@ h4 {
   color: white;
   background-color: #bd301d;
   border-color: #bd301d;
+}
+
+.icon-picture {
+  max-width: 25px;
+  max-height: 25px;
+  border-radius: 50%;
+}
+
+#filter-coins,
+.coin-table {
+  display: grid;
+  grid-template-columns:
+    minmax(40px, 0.4fr)
+    minmax(180px, 2fr)
+    minmax(100px, 1fr)
+    minmax(70px, 0.8fr)
+    minmax(70px, 0.8fr)
+    minmax(70px, 0.8fr)
+    minmax(130px, 1.3fr)
+    minmax(150px, 1.5fr);
+  align-items: center;
+  column-gap: clamp(8px, 1.5vw, 16px);
+  width: 100%;
+  min-width: 900px;
+}
+
+#coin-lists,
+#filter-coins {
+  overflow-x: auto;
+}
+.green {
+  color: green;
+}
+
+.red {
+  color: red;
+}
+
+.coin-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.coin-info p {
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.coin-name {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }

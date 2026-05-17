@@ -5,6 +5,7 @@ const API_SPARKLINE = `sparkline=true&price_change_percentage=1h,24h,7d`;
 const coinList = document.getElementById("coin-lists");
 const coinModal = document.getElementById("coin-modal");
 const coinModalInner = document.getElementById("coin-modal-inner");
+const filterCoins = document.getElementById("filter-coins");
 const coinModalCloseBtn = document.getElementById("coin-modal-close-btn");
 const currencyButton = document.querySelector(".currency-button");
 let currency = localStorage.getItem("currency") ?? "usd";
@@ -14,6 +15,8 @@ const cache = new Map();
 let isSearching = false;
 let currentCoins = [];
 let sparklineChart;
+let savedHeader;
+
 
 currencyButton.addEventListener("click", () => {
   const searchTerm = input.value.toLowerCase().trim();
@@ -112,7 +115,7 @@ const debounceSearch = debounce(searchCoins, 1000);
 input.addEventListener("input", debounceSearch);
 
 async function getCoinsData() {
-  const url = `${API_URL}/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=10&page=1&price_change_percentage=1h,24h,7d&${API_SPARKLINE}&x_cg_demo_api_key=${API_KEY}`;
+  const url = `${API_URL}/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=100&page=1&price_change_percentage=1h,24h,7d&${API_SPARKLINE}&x_cg_demo_api_key=${API_KEY}`;
 
   try {
     const response = await fetch(url);
@@ -125,6 +128,7 @@ async function getCoinsData() {
 
 function renderCoins(coinsToRender) {
   currentCoins = coinsToRender;
+  const visibleCoins = coinsToRender.slice(0, 10);
   if (coinList.children.length === 0) {
     loadingState();
   }
@@ -136,10 +140,11 @@ function renderCoins(coinsToRender) {
     symbol = "€";
   }
 
-  coinsToRender.forEach((coin, index) => {
+  visibleCoins.forEach((coin, index) => {
     const valueTwentyFourHr = coin.price_change_percentage_24h ?? 0;
     const valueOneHr = coin.price_change_percentage_1h_in_currency ?? 0;
     const valueSevenDays = coin.price_change_percentage_7d_in_currency ?? 0;
+    const coinRank = coin.market_cap_rank ?? 0;
 
     const twentyFourHr = getChangeStyle(valueTwentyFourHr);
     const oneHr = getChangeStyle(valueOneHr);
@@ -147,7 +152,7 @@ function renderCoins(coinsToRender) {
 
     coinOutput += `
       <div class="coin-table">
-      <div> ${index + 1} </div>
+      <div> ${coinRank} </div>
       
       <div class = "coin-info " data-id ="${coin.id}">
         <img class="icon-picture" src="${coin.image}" alt="Coin Icon">
@@ -188,7 +193,6 @@ function autoRefresh() {
     timeLeft--;
     if (timeLeft <= 0) {
       timeLeft = 60;
-      // loadData(); - Disabled this for now to make sure it doesn't cross the free demo limit
     }
   }, 1000);
 }
@@ -299,6 +303,42 @@ async function renderSparkLineChart(selectedCoin) {
   });
 }
 
+function sortData() {
+  filterCoins.addEventListener("click", (e) => {
+    const clickedHeader = e.target.closest(".col");
+    if (!clickedHeader) {
+      return;
+    }
+
+    const headerBtn = document.querySelectorAll(".col");
+    headerBtn.forEach((headerBtn) => {
+      headerBtn.classList.remove("active");
+    });
+    clickedHeader.classList.add("active");
+    const oneHeader = clickedHeader.dataset.sort;
+    {
+      if (typeof currentCoins[0][oneHeader] === "string") {
+        if (sortDirection === "desc") {
+          currentCoins.sort((a, b) => b[oneHeader].localeCompare(a[oneHeader]));
+          sortDirection = "asc";
+        } else {
+          currentCoins.sort((a, b) => a[oneHeader].localeCompare(b[oneHeader]));
+          sortDirection = "desc";
+        }
+      } else {
+        if (sortDirection === "desc") {
+          currentCoins.sort((a, b) => a[oneHeader] - b[oneHeader]);
+          sortDirection = "asc";
+        } else {
+          currentCoins.sort((a, b) => b[oneHeader] - a[oneHeader]);
+          sortDirection = "desc";
+        }
+      }
+      renderCoins(currentCoins);
+    }
+  });
+}
+
 coinModalCloseBtn.addEventListener("click", closeModal);
 
 function callFunction() {
@@ -306,6 +346,7 @@ function callFunction() {
   buttonText();
   loadData();
   autoRefresh();
+  sortData();
 }
 
 callFunction();
