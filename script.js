@@ -16,7 +16,7 @@ let isSearching = false;
 let currentCoins = [];
 let sparklineChart;
 let savedHeader;
-
+let sortDirection = "desc";
 
 currencyButton.addEventListener("click", () => {
   const searchTerm = input.value.toLowerCase().trim();
