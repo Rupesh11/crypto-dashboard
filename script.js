@@ -17,6 +17,7 @@ let currentCoins = [];
 let sparklineChart;
 let savedHeader;
 let sortDirection = "desc";
+let activeSortKey = "";
 
 currencyButton.addEventListener("click", () => {
   const searchTerm = input.value.toLowerCase().trim();
@@ -187,12 +188,16 @@ async function loadData() {
 
 function autoRefresh() {
   const countTimer = document.getElementById("counter");
+  const counterText = document.querySelector(".counter-text");
   let timeLeft = 60;
   setInterval(() => {
-    countTimer.textContent = `Page refresh in ${timeLeft}s `;
+    const progress = (timeLeft / 60) * 100;
+    counterText.textContent = `Live Data • ${timeLeft}s`;
+    countTimer.style.setProperty("--progress", `${progress}%  `);
     timeLeft--;
     if (timeLeft <= 0) {
       timeLeft = 60;
+      loadData();
     }
   }, 1000);
 }
@@ -306,36 +311,46 @@ async function renderSparkLineChart(selectedCoin) {
 function sortData() {
   filterCoins.addEventListener("click", (e) => {
     const clickedHeader = e.target.closest(".col");
+
     if (!clickedHeader) {
       return;
     }
-
     const headerBtn = document.querySelectorAll(".col");
     headerBtn.forEach((headerBtn) => {
       headerBtn.classList.remove("active");
+      headerBtn.classList.remove("asc");
+      headerBtn.classList.remove("desc");
     });
     clickedHeader.classList.add("active");
     const oneHeader = clickedHeader.dataset.sort;
-    {
-      if (typeof currentCoins[0][oneHeader] === "string") {
-        if (sortDirection === "desc") {
-          currentCoins.sort((a, b) => b[oneHeader].localeCompare(a[oneHeader]));
-          sortDirection = "asc";
-        } else {
-          currentCoins.sort((a, b) => a[oneHeader].localeCompare(b[oneHeader]));
-          sortDirection = "desc";
-        }
+    if (oneHeader === activeSortKey) {
+      if (sortDirection === "desc") {
+        sortDirection = "asc";
+        clickedHeader.classList.add("asc");
       } else {
-        if (sortDirection === "desc") {
-          currentCoins.sort((a, b) => a[oneHeader] - b[oneHeader]);
-          sortDirection = "asc";
-        } else {
-          currentCoins.sort((a, b) => b[oneHeader] - a[oneHeader]);
-          sortDirection = "desc";
-        }
+        sortDirection = "desc";
+        clickedHeader.classList.add("desc");
       }
-      renderCoins(currentCoins);
+    } else {
+      activeSortKey = oneHeader;
+      sortDirection = "desc";
+      clickedHeader.classList.add("desc");
     }
+
+    if (typeof currentCoins[0][oneHeader] === "string") {
+      if (sortDirection === "asc") {
+        currentCoins.sort((a, b) => a[oneHeader].localeCompare(b[oneHeader]));
+      } else {
+        currentCoins.sort((a, b) => b[oneHeader].localeCompare(a[oneHeader]));
+      }
+    } else if (typeof currentCoins[0][oneHeader] === "number") {
+      if (sortDirection === "desc") {
+        currentCoins.sort((a, b) => b[oneHeader] - a[oneHeader]);
+      } else {
+        currentCoins.sort((a, b) => a[oneHeader] - b[oneHeader]);
+      }
+    }
+    renderCoins(currentCoins);
   });
 }
 
