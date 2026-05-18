@@ -1,23 +1,16 @@
-# 🚀 Crypto Market Dashboard
+# Crypto Market Dashboard
 
 A simple JavaScript app that displays live cryptocurrency data using the CoinGecko API.
 
----
+## Features
 
-## 📸 Preview
-
-> Add a screenshot of your app here  
-> (e.g. `![App Screenshot](./screenshot.png)`)
-
----
-
-## ✨ Features
-
-- 📊 View top cryptocurrencies by market cap
-- 💱 Toggle between USD and EUR
-- 🔍 Search coins by name or symbol (no API re-fetch)
-- 🔄 Auto-refresh every 60 seconds
-- 💾 Saves selected currency using localStorage
-- 📈 Shows 1h, 24h, and 7d price changes
-- 🎨 Colour-coded price changes (green/red)
-- ⏳ Loading & error states
+View top cryptocurrencies by market cap
+Toggle between USD and EUR
+Search coins by name or symbol (no API re-fetch)
+Auto-refresh every 60 seconds
+Saves selected currency using localStorage
+Shows 1h, 24h, and 7d price changes
+Colour-coded price changes (green/red)
+Loading & error states
+Pop up modal with sparkline chart
+Sort coin rank, names, price, 1hr, 24hr, 7d, 24h Volume, Marketcap
