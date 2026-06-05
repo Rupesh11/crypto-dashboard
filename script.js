@@ -8,74 +8,105 @@ const coinModalInner = document.getElementById("coin-modal-inner");
 const filterCoins = document.getElementById("filter-coins");
 const coinModalCloseBtn = document.getElementById("coin-modal-close-btn");
 const currencyButton = document.querySelector(".currency-button");
-let currency = localStorage.getItem("currency") ?? "usd";
 const input = document.getElementById("search-coin");
+
+let currency = localStorage.getItem("currency") ?? "usd";
+
 let allCoins = [];
-const cache = new Map();
-let isSearching = false;
 let currentCoins = [];
 let sparklineChart;
+
+const cache = new Map();
+
+let isSearching = false;
 let savedHeader;
 let sortDirection = "desc";
 let activeSortKey = "";
+let debounceTimer;
+
+function buttonText() {
+  currencyButton.textContent = currency === "eur" ? "USD" : "EUR";
+}
+
+function loadingState() {
+  coinList.innerHTML = `<span>Loading Coins...</span>`;
+}
+
+function errorState() {
+  coinList.innerHTML = `<span>Server Down</span>`;
+}
+
+function getChangeStyle(value) {
+  if (value > 0) {
+    return { className: "green", sign: "+" };
+  } else {
+    return { className: "red", sign: "" };
+  }
+}
+
+function backHome() {
+  const resetButton = document.getElementById("back-home");
+  resetButton.addEventListener("click", () => {
+    loadData();
+  });
+}
 
 currencyButton.addEventListener("click", () => {
   const searchTerm = input.value.toLowerCase().trim();
   currency === "eur" ? (currency = "usd") : (currency = "eur");
   buttonText();
   if (searchTerm.length >= 3) {
-    searchCoins();
+    searchCoins(searchTerm);
   } else {
-    loadData();
+    refreshCurrentView();
   }
   localStorage.setItem("currency", currency);
 });
 
-function buttonText() {
-  if (currency === "eur") {
-    currencyButton.textContent = "USD";
-  } else {
-    currencyButton.textContent = "EUR";
-  }
-}
+async function searchCoins(searchTerm) {
+  const API_SEARCH = `${API_URL}/search?query=${searchTerm}&per_page=10&page=1`;
+  const cacheKey = `search-${searchTerm}-${currency}`;
 
-async function searchCoins() {
-  const searchTerm = input.value.toLowerCase().trim();
-  const API_SEARCH = `${API_URL}/search?query=${searchTerm}&per_page=10&page=1&`;
-  const cacheKey = `${searchTerm}-${currency}`;
+  if (searchTerm.length < 3) {
+    renderCoins(allCoins);
+    return;
+  }
+
+  if (cache.has(cacheKey)) {
+    renderCoins(cache.get(cacheKey));
+    return;
+  }
 
   try {
-    if (searchTerm.length < 3) {
-      renderCoins(allCoins);
-      return;
-    }
-    if (cache.has(cacheKey)) {
-      const cachedResult = cache.get(cacheKey);
-      renderCoins(cachedResult);
-      return;
-    }
-    if (isSearching) {
-      return;
-    }
-    isSearching = true;
-    const searchResponse = await fetch(API_SEARCH);
-    if (!searchResponse.ok) {
-      throw new Error(`Error: ${searchResponse.status}`);
-    }
-    const searchData = await searchResponse.json();
-    const newAllCoins = searchData.coins.slice(0, 10).map(myFunction);
-    const marketData = await idSearch(newAllCoins);
-    if (!marketData) {
-      return;
-    }
-    cache.set(cacheKey, marketData);
+    if (isSearching) return;
 
-    function myFunction(coin) {
-      return coin.id;
+    isSearching = true;
+    loadingState();
+
+    const searchResponse = await fetch(API_SEARCH);
+
+    if (!searchResponse.ok) {
+      throw new Error(`Search Error: ${searchResponse.status}`);
     }
-    renderCoins(marketData);
+
+    const searchData = await searchResponse.json();
+
+    const coinIds = searchData.coins.slice(0, 10).map((coin) => coin.id);
+
+    if (coinIds.length === 0) {
+      coinList.innerHTML = `<span>No coins found</span>`;
+      return;
+    }
+
+    const marketData = await idSearch(coinIds);
+
+    if (marketData) {
+      cache.set(cacheKey, marketData);
+      renderCoins(marketData);
+    }
   } catch (error) {
     console.log(error);
+    errorState();
   } finally {
     isSearching = false;
   }
@@ -112,38 +143,50 @@ function debounce(func, delay) {
   };
 }
 
-const debounceSearch = debounce(searchCoins, 1000);
+const debounceSearch = debounce(() => {
+  searchCoins(input.value.toLowerCase().trim());
+}, 1000);
+
 input.addEventListener("input", debounceSearch);
 
 async function getCoinsData() {
-  const url = `${API_URL}/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=100&page=1&price_change_percentage=1h,24h,7d&${API_SPARKLINE}&x_cg_demo_api_key=${API_KEY}`;
+  const url = `${API_URL}/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=100&page=1&${API_SPARKLINE}&x_cg_demo_api_key=${API_KEY}`;
 
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.log(error);
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status}`);
   }
+
+  return await response.json();
 }
 
 function renderCoins(coinsToRender) {
   currentCoins = coinsToRender;
   const visibleCoins = coinsToRender.slice(0, 10);
+  const symbol = getCurrencySymbol();
   if (coinList.children.length === 0) {
     loadingState();
   }
-  let symbol = "$";
-  let coinOutput = "";
-  if (currency === "usd") {
-    symbol = "$";
-  } else if (currency === "eur") {
-    symbol = "€";
+
+  const coinOutput = coinLoop(visibleCoins, symbol);
+
+  coinList.innerHTML = coinOutput;
+}
+
+function getCurrencySymbol() {
+  if (currency === "eur") {
+    return "€";
   }
+  return "$";
+}
+
+function coinLoop(visibleCoins, symbol) {
+  let coinOutput = "";
 
   visibleCoins.forEach((coin, index) => {
-    const valueTwentyFourHr = coin.price_change_percentage_24h ?? 0;
     const valueOneHr = coin.price_change_percentage_1h_in_currency ?? 0;
+    const valueTwentyFourHr = coin.price_change_percentage_24h_in_currency ?? 0;
     const valueSevenDays = coin.price_change_percentage_7d_in_currency ?? 0;
     const coinRank = coin.market_cap_rank ?? 0;
 
@@ -172,7 +215,7 @@ function renderCoins(coinsToRender) {
 
       `;
   });
-  coinList.innerHTML = coinOutput;
+  return coinOutput;
 }
 
 async function loadData() {
@@ -181,7 +224,6 @@ async function loadData() {
     allCoins = coinData;
     renderCoins(allCoins);
   } catch (error) {
-    console.log(error);
     errorState();
   }
 }
@@ -192,29 +234,64 @@ function autoRefresh() {
   let timeLeft = 60;
   setInterval(() => {
     const progress = (timeLeft / 60) * 100;
-    counterText.textContent = `Live Data • ${timeLeft}s`;
+    counterText.textContent = `Live Data`;
     countTimer.style.setProperty("--progress", `${progress}%  `);
     timeLeft--;
     if (timeLeft <= 0) {
       timeLeft = 60;
-      loadData();
+      refreshCurrentView();
     }
   }, 1000);
 }
 
-function loadingState() {
-  coinList.innerHTML = `<span>Loading Coins...</span>`;
-}
+async function refreshCurrentView() {
+  const searchTerm = input.value.toLowerCase().trim();
 
-function errorState() {
-  coinList.innerHTML = `<span>Server Down</span>`;
-}
-
-function getChangeStyle(value) {
-  if (value > 0) {
-    return { className: "green", sign: "+" };
+  if (searchTerm.length >= 3) {
+    cache.delete(`${searchTerm}-${currency}`);
+    await searchCoins(searchTerm);
   } else {
-    return { className: "red", sign: "" };
+    await loadData();
+  }
+  if (activeSortKey) {
+    applySort();
+  }
+}
+
+function applySort() {
+  if (!activeSortKey || currentCoins.length === 0) return;
+
+  currentCoins.sort((a, b) => {
+    let valueA = a[activeSortKey];
+    let valueB = b[activeSortKey];
+
+    if (valueA === null || valueA === undefined) valueA = 0;
+    if (valueB === null || valueA === undefined) valueA = 0;
+
+    if (typeof valueA === "string" && typeof valueB === "string") {
+      return sortDirection === "asc"
+        ? valueA.localeCompare(valueB)
+        : valueB.localeCompare(valueA);
+    }
+
+    return sortDirection === "asc" ? valueA - valueB : valueB - valueA;
+  });
+
+  renderCoins(currentCoins);
+}
+
+async function handleHeaderSort() {
+  try {
+    loadingState();
+
+    const freshTop100 = await getCoinsData();
+
+    allCoins = freshTop100;
+    currentCoins = [...freshTop100];
+
+    applySort();
+  } catch (error) {
+    errorState;
   }
 }
 
@@ -309,48 +386,29 @@ async function renderSparkLineChart(selectedCoin) {
 }
 
 function sortData() {
-  filterCoins.addEventListener("click", (e) => {
+  filterCoins.addEventListener("click", async (e) => {
     const clickedHeader = e.target.closest(".col");
 
-    if (!clickedHeader) {
-      return;
-    }
+    if (!clickedHeader) return;
+
     const headerBtn = document.querySelectorAll(".col");
+
     headerBtn.forEach((headerBtn) => {
-      headerBtn.classList.remove("active");
-      headerBtn.classList.remove("asc");
-      headerBtn.classList.remove("desc");
+      headerBtn.classList.remove("active", "asc", "desc");
     });
     clickedHeader.classList.add("active");
-    const oneHeader = clickedHeader.dataset.sort;
-    if (oneHeader === activeSortKey) {
-      if (sortDirection === "desc") {
-        sortDirection = "asc";
-        clickedHeader.classList.add("asc");
-      } else {
-        sortDirection = "desc";
-        clickedHeader.classList.add("desc");
-      }
+
+    const sortKey = clickedHeader.dataset.sort;
+
+    if (sortKey === activeSortKey) {
+      sortDirection = sortDirection === "desc" ? "asc" : "desc";
     } else {
-      activeSortKey = oneHeader;
+      activeSortKey = sortKey;
       sortDirection = "desc";
-      clickedHeader.classList.add("desc");
     }
 
-    if (typeof currentCoins[0][oneHeader] === "string") {
-      if (sortDirection === "asc") {
-        currentCoins.sort((a, b) => a[oneHeader].localeCompare(b[oneHeader]));
-      } else {
-        currentCoins.sort((a, b) => b[oneHeader].localeCompare(a[oneHeader]));
-      }
-    } else if (typeof currentCoins[0][oneHeader] === "number") {
-      if (sortDirection === "desc") {
-        currentCoins.sort((a, b) => b[oneHeader] - a[oneHeader]);
-      } else {
-        currentCoins.sort((a, b) => a[oneHeader] - b[oneHeader]);
-      }
-    }
-    renderCoins(currentCoins);
+    clickedHeader.classList.add(sortDirection);
+    await handleHeaderSort();
   });
 }
 
@@ -362,6 +420,7 @@ function callFunction() {
   loadData();
   autoRefresh();
   sortData();
+  backHome();
 }
 
 callFunction();

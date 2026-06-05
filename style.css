@@ -36,6 +36,10 @@ body {
   gap: 10px;
 }
 
+#back-home {
+  cursor: pointer;
+}
+
 .nav-bar h1,
 .heading h1 {
   color: #000000;
@@ -55,31 +59,36 @@ body {
   box-shadow: 0 0 0 4px rgba(150, 175, 245, 0.25);
 }
 
-#counter {
+.countdown-circle {
+  --progress: 100%;
+
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+
+  display: grid;
+  place-items: center;
+
+  background: conic-gradient(#f6fa00 var(--progress), #e9ec0a var(--progress));
+
   position: relative;
-  width: 20rem;
-  height: 18px;
-  background: #ffffff;
-  border-radius: 999px;
-  overflow: hidden;
-  text-align: center;
-  font-family: "Roboto Mono", monospace;
+}
+
+.countdown-circle::before {
+  content: "";
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #f6fa00;
 }
 
 .counter-text {
   position: relative;
   z-index: 1;
-}
-
-#counter::before {
-  content: "";
-  display: block;
-  height: 100%;
-  width: var(--progress, 100%);
-  background: linear-gradient(90deg, #3872ee, #d3e912);
-  transition: width 1s linear;
-  position: absolute;
-  z-index: 0;
+  color: rgb(0, 0, 0);
+  font-size: 0.70rem;
+  font-weight: 700;
 }
 
 /* Header & Currency Button  */
@@ -95,7 +104,7 @@ body {
   width: 52px;
   border-radius: 50%;
   border: none;
-  background: #def0c2;
+  background: #f5de12;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
   cursor: pointer;
   font-weight: 700;
